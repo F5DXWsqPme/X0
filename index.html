@@ -16,7 +16,10 @@
 
 			let Cells;
 			let WinCells;
-			let StepId = 1;
+			let NumOfSteps;
+			let StepCells;
+			let StepId;
+			let Win;
 
 			const WinCombs =
 			[
@@ -43,7 +46,6 @@
 
 			function InitCells()
 			{
-				// 0-none, 1-x, 2-0
 				Cells =
 				[
 					[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -57,15 +59,56 @@
 					[0, 0, 0, 0, 0, 0, 0, 0, 0]
 				];
 				WinCells = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+				NumOfSteps = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+				StepCells = [1, 1, 1, 1, 1, 1, 1, 1, 1];
 			}
 
-			function CheckWin(N)
+			function CheckWin(c1)
 			{
-				LC = Cells[N];
 
-				for (var i = 0; i < WinCombs.length; i++) {
-					WinCombs[i]
+				for (let Id = 1; Id <= 2; Id++)
+				{
+					for (let i = 0; i < WinCombs.length; i++)
+					{
+						let Flag = 1;
+						for (let j = 0; j < WinCombs[i].length; j++)
+						{
+							if (WinCombs[i][j] && Cells[c1][j] != Id)
+							{
+								Flag = 0;
+							}
+						}
+						if (Flag)
+						{
+							return Id;
+						}
+					}
 				}
+				return 0;
+			}
+
+			function CheckWinAll()
+			{
+
+				for (let Id = 1; Id <= 2; Id++)
+				{
+					for (let i = 0; i < WinCombs.length; i++)
+					{
+						let Flag = 1;
+						for (let j = 0; j < WinCombs[i].length; j++)
+						{
+							if (WinCombs[i][j] && WinCells[j] != Id)
+							{
+								Flag = 0;
+							}
+						}
+						if (Flag)
+						{
+							return Id;
+						}
+					}
+				}
+				return 0;
 			}
 
 			function GetCoords(c1, c2)
@@ -81,13 +124,14 @@
 				return Pare;
 			}
 
-			function DrawCell(x, y, t)
+			function DrawCell(x, y, t, s)
 			{
 				if (t == 1)
 				{
 					let LOff = CellSize * 0.091;
 
-					Ctx.strokeStyle = "#FF0000";
+
+					Ctx.strokeStyle = "#FF0000";	
 					Ctx.beginPath();
 					Ctx.moveTo(x + LOff, y + LOff);
 					Ctx.lineTo(x + CellSize - LOff, y + CellSize - LOff);
@@ -105,6 +149,10 @@
 					Ctx.arc(x + CellSize / 2, y + CellSize / 2, CellSize / 2.2, 0, Math.PI * 2);
 					Ctx.fill();
 					Ctx.fillStyle = "#FFFFFF";
+					if (s == 1)
+						Ctx.fillStyle = "#FFDDDD";
+					if (s == 2)
+						Ctx.fillStyle = "#DDDDFF";
 					Ctx.beginPath();
 					Ctx.arc(x + CellSize / 2, y + CellSize / 2, CellSize / 2.2 - LineWidth, 0, Math.PI * 2);
 					Ctx.fill();
@@ -130,7 +178,7 @@
 							x = x0 + LineWidth;
 							for (var j1 = 0; j1 < 3; j1++)
 							{
-								DrawCell(x, y, Cells[i * 3 + j][i1 * 3 + j1]);
+								DrawCell(x, y, Cells[i * 3 + j][i1 * 3 + j1], StepCells[i * 3 + j]);
 								x = x + CellSize + LineWidth;			
 							}				
 							y = y + CellSize + LineWidth;					
@@ -141,11 +189,39 @@
 				}
 			}
 
+			function DrawWin()
+			{
+				Ctx.textAlign = "center";
+  				Ctx.textBaseline = "middle";
+  				Ctx.font = "30pt Arial";
+				if (Win == 1)
+				{
+					Ctx.fillStyle = "#F00";
+					Ctx.fillText("КРАСНЫЕ ПОБЕДИЛИ", Can.width / 2, Can.height / 2);
+				}
+				if (Win == 2)
+				{
+					Ctx.fillStyle = "#00F";
+					Ctx.fillText("СИНИЕ ПОБЕДИЛИ", Can.width / 2, Can.height / 2);
+				}
+				if (Win == 3)
+				{
+					Ctx.fillStyle = "#000";
+					Ctx.fillText("НИЧЬЯ", Can.width / 2, Can.height / 2);
+				}
+			}
+
 			function Redraw()
 			{
 				Ctx.fillStyle = "#FFFFFF";
 				Ctx.fillRect(0, 0, Can.width, Can.height);
 				Ctx.fillStyle = "#000000";
+
+				if (Win != 0)
+				{
+					DrawWin();
+					return;
+				}
 
 				let x;
 				let y = CellSize + OffsetY;
@@ -155,6 +231,40 @@
 					x = CellSize + OffsetX;
 					for (let j = 0; j < 3; j++)
 					{
+						Ctx.fillStyle = "#FFFFFF";
+						if (WinCells[i * 3 + j] == 1)
+						{
+							Ctx.fillStyle = "#FF0000";
+						}
+						if (WinCells[i * 3 + j] == 2)
+						{
+							Ctx.fillStyle = "#0000FF";
+						}
+						Ctx.fillRect(x, y,
+								 	 3 * CellSize + 4 * LineWidth,
+								 	 3 * CellSize + 4 * LineWidth);
+						Ctx.fillStyle = "#FFFFFF";
+						Ctx.fillRect(x + LineWidth, y + LineWidth,
+									 3 * CellSize + 2 * LineWidth,
+									 3 * CellSize + 2 * LineWidth);
+						Ctx.fillStyle = "#000000";
+
+						if (StepCells[i * 3 + j])
+						{
+							if (StepId == 1)
+							{
+								Ctx.fillStyle = "#FFDDDD";
+							}
+							if (StepId == 2)
+							{
+								Ctx.fillStyle = "#DDDDFF";
+							}
+							Ctx.fillRect(x + LineWidth, y + LineWidth,
+									 	 3 * CellSize + 2 * LineWidth,
+									 	 3 * CellSize + 2 * LineWidth);
+							Ctx.fillStyle = "#000000";
+						}
+
 						Ctx.beginPath();
 						Ctx.moveTo(x + 1.5 * LineWidth + CellSize, y + 0.5 * LineWidth);
 						Ctx.lineTo(x + 1.5 * LineWidth + CellSize, y + 3.5 * LineWidth + 3 * CellSize);
@@ -185,13 +295,63 @@
 
 			function Step(c1, c2)
 			{
+				if (Cells[c1][c2] != 0 || StepCells[c1] != StepId || Win != 0)
+				{
+					return;
+				}
 				Cells[c1][c2] = StepId;
 				StepId = (StepId % 2) + 1;
+				NumOfSteps[c1]++;
+
+				if (WinCells[c1] == 0)
+				{
+					WinCells[c1] = CheckWin(c1);
+					Win = CheckWinAll();
+				}
+
+				if (NumOfSteps[c2] > 8)
+				{
+					let Flag = 0;
+
+					for (let i = 0; i < 9; i++)
+					{
+						if (NumOfSteps[i] < 9)
+						{
+							Flag = 1;
+							StepCells[i] = StepId;
+						}
+						else
+						{
+							StepCells[i] = 0;
+						}
+					}
+					if (Flag == 0)
+					{
+						Win = 3;
+						DrawWin();
+						return;
+					}
+				}
+				else
+				{
+					for (let i = 0; i < 9; i++)
+					{
+						StepCells[i] = 0;
+					}
+					StepCells[c2] = StepId;
+				}
+
 				Redraw();
 			}
 
 			function Event(x, y)
 			{
+				if (Win != 0)
+				{
+					StartGame();
+					return;
+				}
+
 				for (let i = 0; i < 9; i++)
 				{
 					for (let j = 0; j < 9; j++)
@@ -224,12 +384,15 @@
 
 			function StartGame()
 			{
+				StepId = 1;
+				Win = 0;
 				InitCells();
 				Redraw();
-				StepId = 1;
 			}
 
-			StartGame();
+			//StartGame();
+			Win = 1;
+			DrawWin();
 		</script>
 
 	</body>
