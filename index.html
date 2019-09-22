@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset = "utf-8" name = "viewport" content = "width=device-width,user-scalable=no">
+		<title>Toe</title>
+	</head>
+	<body style = "margin: 0;">
+		<canvas id = "canvas"></canvas>
+
+		<script>
+			let Can = document.getElementById("canvas");  
+			let Ctx = Can.getContext("2d");
+
+			Can.width = window.innerWidth;
+			Can.height = window.innerHeight;
+
+			Ctx.lineWidth = 20;
+
+			Ctx.beginPath();
+			Ctx.arc(50, 50, 10, 0, Math.PI * 2);
+			Ctx.fill();
+
+			function Event(x, y)
+			{
+				Ctx.beginPath();
+				Ctx.arc(x, y, 10, 0, Math.PI * 2);
+				Ctx.fill();
+			}
+
+			Can.onclick = function(e)
+			{
+				var x = (e.pageX - Can.offsetLeft);
+				var y = (e.pageY - Can.offsetTop);
+
+				Event(x, y);
+			};
+			Can.ontouchend = function(e)
+			{
+				var x = (e.touches[0].pageX - Can.offsetLeft);
+				var y = (e.touches[0].pageY - Can.offsetTop);
+
+				Event(x, y);
+			}
+
+
+		</script>
+
+	</body>
+</html>
