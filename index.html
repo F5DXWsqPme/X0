@@ -15,6 +15,20 @@
 			Can.height = window.innerHeight;
 
 			let Cells;
+			let WinCells;
+			let StepId = 1;
+
+			const WinCombs =
+			[
+				[1, 1, 1, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 1, 1, 1, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 1, 1, 1],
+				[1, 0, 0, 1, 0, 0, 1, 0, 0],
+				[0, 1, 0, 0, 1, 0, 0, 1, 0],
+				[0, 0, 1, 0, 0, 1, 0, 0, 1],
+				[0, 0, 1, 0, 1, 0, 1, 0, 0],
+				[1, 0, 0, 0, 1, 0, 0, 0, 1]
+			];
 
 			let Size = Can.width > Can.height ? Can.height : Can.width;
 			let OffsetX = (Can.width - Size) / 2;
@@ -42,15 +56,25 @@
 					[0, 0, 0, 0, 0, 0, 0, 0, 0],
 					[0, 0, 0, 0, 0, 0, 0, 0, 0]
 				];
+				WinCells = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+			}
+
+			function CheckWin(N)
+			{
+				LC = Cells[N];
+
+				for (var i = 0; i < WinCombs.length; i++) {
+					WinCombs[i]
+				}
 			}
 
 			function GetCoords(c1, c2)
 			{
-				let x1 = CellSize + (c1 % 3) * 4 * (LineWidth + CellSize);
-				let y1 = CellSize + Math.floor(c1 / 3) * 4 * (LineWidth + CellSize);
+				let x1 = OffsetX + CellSize + (c1 % 3) * 4 * (LineWidth + CellSize);
+				let y1 = OffsetY + CellSize + Math.floor(c1 / 3) * 4 * (LineWidth + CellSize);
 
 				let x2 = LineWidth + (c2 % 3) * (LineWidth + CellSize);
-				let y2 = LineWidth + Math.floor(c1 / 3) * (LineWidth + CellSize);
+				let y2 = LineWidth + Math.floor(c2 / 3) * (LineWidth + CellSize);
 
 				let Pare = {x: x1 + x2, y: y1 + y2};
 
@@ -63,6 +87,7 @@
 				{
 					let LOff = CellSize * 0.091;
 
+					Ctx.strokeStyle = "#FF0000";
 					Ctx.beginPath();
 					Ctx.moveTo(x + LOff, y + LOff);
 					Ctx.lineTo(x + CellSize - LOff, y + CellSize - LOff);
@@ -71,9 +96,11 @@
 					Ctx.moveTo(x + LOff, y + CellSize - LOff);
 					Ctx.lineTo(x + CellSize - LOff, y + LOff);	
 					Ctx.stroke();
+					Ctx.strokeStyle = "#000000";
 				}
 				if (t == 2)
 				{
+					Ctx.fillStyle = "#0000FF";
 					Ctx.beginPath();
 					Ctx.arc(x + CellSize / 2, y + CellSize / 2, CellSize / 2.2, 0, Math.PI * 2);
 					Ctx.fill();
@@ -103,7 +130,7 @@
 							x = x0 + LineWidth;
 							for (var j1 = 0; j1 < 3; j1++)
 							{
-								DrawCell(x, y, 1);
+								DrawCell(x, y, Cells[i * 3 + j][i1 * 3 + j1]);
 								x = x + CellSize + LineWidth;			
 							}				
 							y = y + CellSize + LineWidth;					
@@ -114,8 +141,69 @@
 				}
 			}
 
+			function Redraw()
+			{
+				Ctx.fillStyle = "#FFFFFF";
+				Ctx.fillRect(0, 0, Can.width, Can.height);
+				Ctx.fillStyle = "#000000";
+
+				let x;
+				let y = CellSize + OffsetY;
+
+				for (let i = 0; i < 3; i++)
+				{
+					x = CellSize + OffsetX;
+					for (let j = 0; j < 3; j++)
+					{
+						Ctx.beginPath();
+						Ctx.moveTo(x + 1.5 * LineWidth + CellSize, y + 0.5 * LineWidth);
+						Ctx.lineTo(x + 1.5 * LineWidth + CellSize, y + 3.5 * LineWidth + 3 * CellSize);
+						Ctx.stroke();
+
+						Ctx.beginPath();
+						Ctx.moveTo(x + 2.5 * LineWidth + 2 * CellSize, y + 0.5 * LineWidth);
+						Ctx.lineTo(x + 2.5 * LineWidth + 2 * CellSize, y + 3.5 * LineWidth + 3 * CellSize);
+						Ctx.stroke();
+
+						Ctx.beginPath();
+						Ctx.moveTo(x + 0.5 * LineWidth, y + 1.5 * LineWidth + CellSize);
+						Ctx.lineTo(x + 3.5 * LineWidth + 3 * CellSize, y + 1.5 * LineWidth + CellSize);
+						Ctx.stroke();
+
+						Ctx.beginPath();
+						Ctx.moveTo(x + 0.5 * LineWidth, y + 2.5 * LineWidth + 2 * CellSize);
+						Ctx.lineTo(x + 3.5 * LineWidth + 3 * CellSize, y + 2.5 * LineWidth + 2 * CellSize);
+						Ctx.stroke();
+
+						x = x + 4 * (LineWidth + CellSize);
+					}
+					y = y + 4 * (LineWidth + CellSize);
+				}
+
+				DrawCells();
+			}
+
+			function Step(c1, c2)
+			{
+				Cells[c1][c2] = StepId;
+				StepId = (StepId % 2) + 1;
+				Redraw();
+			}
+
 			function Event(x, y)
 			{
+				for (let i = 0; i < 9; i++)
+				{
+					for (let j = 0; j < 9; j++)
+					{
+						let p = GetCoords(i, j);
+
+						if (x > p.x && x < p.x + CellSize && y > p.y && y < p.y + CellSize)
+						{
+							Step(i, j);
+						}
+					}
+				}
 			}
 
 			Can.onclick = function(e)
@@ -125,6 +213,7 @@
 
 				Event(x, y);
 			};
+
 			Can.ontouchend = function(e)
 			{
 				var x = (e.touches[0].pageX - Can.offsetLeft);
@@ -133,7 +222,14 @@
 				Event(x, y);
 			}
 
-			DrawCells();
+			function StartGame()
+			{
+				InitCells();
+				Redraw();
+				StepId = 1;
+			}
+
+			StartGame();
 		</script>
 
 	</body>
