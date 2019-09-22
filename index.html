@@ -14,17 +14,108 @@
 			Can.width = window.innerWidth;
 			Can.height = window.innerHeight;
 
-			Ctx.lineWidth = 20;
+			let Cells;
 
-			Ctx.beginPath();
-			Ctx.arc(50, 50, 10, 0, Math.PI * 2);
-			Ctx.fill();
+			let Size = Can.width > Can.height ? Can.height : Can.width;
+			let OffsetX = (Can.width - Size) / 2;
+			let OffsetY = (Can.height - Size) / 2;
+			let CellSize = Size / 14;
+			let LineWidth = (Size - 13 * CellSize) / 12;
+
+			Ctx.lineWidth = LineWidth;
+			Ctx.lineCap = "round";
+ 			Ctx.lineJoin = "round";
+  			Ctx.strokeStyle = "#000000";
+
+			function InitCells()
+			{
+				// 0-none, 1-x, 2-0
+				Cells =
+				[
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0, 0, 0, 0, 0]
+				];
+			}
+
+			function GetCoords(c1, c2)
+			{
+				let x1 = CellSize + (c1 % 3) * 4 * (LineWidth + CellSize);
+				let y1 = CellSize + Math.floor(c1 / 3) * 4 * (LineWidth + CellSize);
+
+				let x2 = LineWidth + (c2 % 3) * (LineWidth + CellSize);
+				let y2 = LineWidth + Math.floor(c1 / 3) * (LineWidth + CellSize);
+
+				let Pare = {x: x1 + x2, y: y1 + y2};
+
+				return Pare;
+			}
+
+			function DrawCell(x, y, t)
+			{
+				if (t == 1)
+				{
+					let LOff = CellSize * 0.091;
+
+					Ctx.beginPath();
+					Ctx.moveTo(x + LOff, y + LOff);
+					Ctx.lineTo(x + CellSize - LOff, y + CellSize - LOff);
+					Ctx.stroke();
+					Ctx.beginPath();
+					Ctx.moveTo(x + LOff, y + CellSize - LOff);
+					Ctx.lineTo(x + CellSize - LOff, y + LOff);	
+					Ctx.stroke();
+				}
+				if (t == 2)
+				{
+					Ctx.beginPath();
+					Ctx.arc(x + CellSize / 2, y + CellSize / 2, CellSize / 2.2, 0, Math.PI * 2);
+					Ctx.fill();
+					Ctx.fillStyle = "#FFFFFF";
+					Ctx.beginPath();
+					Ctx.arc(x + CellSize / 2, y + CellSize / 2, CellSize / 2.2 - LineWidth, 0, Math.PI * 2);
+					Ctx.fill();
+					Ctx.fillStyle = "#000000";
+				}
+			}
+
+			function DrawCells()
+			{
+				let x0;
+				let y0 = CellSize + OffsetY;
+
+				for (let i = 0; i < 3; i++)
+				{
+					x0 = CellSize + OffsetX;
+					for (let j = 0; j < 3; j++)
+					{
+						let x = x0 + LineWidth;
+						let y = y0 + LineWidth;
+
+						for (var i1 = 0; i1 < 3; i1++)
+						{
+							x = x0 + LineWidth;
+							for (var j1 = 0; j1 < 3; j1++)
+							{
+								DrawCell(x, y, 1);
+								x = x + CellSize + LineWidth;			
+							}				
+							y = y + CellSize + LineWidth;					
+						}
+						x0 = x0 + 4 * (LineWidth + CellSize);
+					}
+					y0 = y0 + 4 * (LineWidth + CellSize);
+				}
+			}
 
 			function Event(x, y)
 			{
-				Ctx.beginPath();
-				Ctx.arc(x, y, 10, 0, Math.PI * 2);
-				Ctx.fill();
 			}
 
 			Can.onclick = function(e)
@@ -42,7 +133,7 @@
 				Event(x, y);
 			}
 
-
+			DrawCells();
 		</script>
 
 	</body>
