@@ -8,11 +8,10 @@
 		<canvas id = "canvas"></canvas>
 
 		<script>
+			window.addEventListener('resize', InitCanvas);
+
 			let Can = document.getElementById("canvas");  
 			let Ctx = Can.getContext("2d");
-
-			Can.width = window.innerWidth;
-			Can.height = window.innerHeight;
 
 			let Cells;
 			let WinCells;
@@ -20,6 +19,12 @@
 			let StepCells;
 			let StepId;
 			let Win;
+
+			let Size;
+			let OffsetX;
+			let OffsetY;
+			let CellSize;
+			let LineWidth;
 
 			const WinCombs =
 			[
@@ -32,17 +37,6 @@
 				[0, 0, 1, 0, 1, 0, 1, 0, 0],
 				[1, 0, 0, 0, 1, 0, 0, 0, 1]
 			];
-
-			let Size = Can.width > Can.height ? Can.height : Can.width;
-			let OffsetX = (Can.width - Size) / 2;
-			let OffsetY = (Can.height - Size) / 2;
-			let CellSize = Size / 14;
-			let LineWidth = (Size - 13 * CellSize) / 12;
-
-			Ctx.lineWidth = LineWidth;
-			Ctx.lineCap = "round";
- 			Ctx.lineJoin = "round";
-  			Ctx.strokeStyle = "#000000";
 
 			function InitCells()
 			{
@@ -382,11 +376,31 @@
 				Event(x, y);
 			}
 
+			function InitCanvas() {
+				Can.width = window.innerWidth;
+				Can.height = window.innerHeight;
+
+				Size = Can.width > Can.height ? Can.height : Can.width;
+				OffsetX = (Can.width - Size) / 2;
+				OffsetY = (Can.height - Size) / 2;
+				CellSize = Size / 14;
+				LineWidth = (Size - 13 * CellSize) / 12;
+
+				Ctx.lineWidth = LineWidth;
+				Ctx.lineCap = "round";
+				Ctx.lineJoin = "round";
+				Ctx.strokeStyle = "#000000";
+
+				Redraw();
+			}
+
 			function StartGame()
 			{
 				StepId = 1;
 				Win = 0;
 				InitCells();
+
+				InitCanvas();
 				Redraw();
 			}
 
